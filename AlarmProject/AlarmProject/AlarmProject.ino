@@ -43,6 +43,11 @@ byte colPins[COLS] = {2, 3, 4, 5};
 
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
+int attempts = 0;
+
+String USERS[] = {"airmonster", "bluekey"};
+String UUIDS[] = {"F6 BD 3E F3","D0 F1 65 A3"};
+int PASSW[2][5] = {{65,65,65,65,35},{61,61,61,61,35}};
 
 void setup()
 {
@@ -52,18 +57,52 @@ void setup()
     FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds, 1);
     FastLED.setBrightness(30);
     pinMode(SWITCH_PIN, INPUT_PULLUP);
+
+
 }
 
 
-int keypadWork(char key){
-        Serial.println(key);
+int keypadWork(int uuidPosition){
+  Serial.println("Enter your 4 digit pin...\n");
+  int password[5];
+  int userPassword = PASSW[uuidPosition];
+  
+  
+  for (int i = 0; i < 5; ++i){
+    while((password[i] = keypad.getKey())==NO_KEY) {
+      delay(1);
+    } 
+    
+    while(keypad.getKey() != NO_KEY) {
+      delay(1);
+    } 
+
+  }
+
+
+  int legitPassword[] = {65,65,65,65,35};
+
+
+  for (int i=0; i < 5; i++){
+    if (password[i] != PASSW[uuidPosition][i]){
+      return -1;
+    }
+
+  }
+
+
   return 0;
   
 }
 
 
-void siren() 
-{         
+
+void siren(){
+
+  int count = 0;
+
+  while (count < 10){
+        
   for(int hz = 440; hz < 1000; hz+=25)
   {
     tone(buzz, hz, 50);
@@ -74,6 +113,9 @@ void siren()
     tone(buzz, hz, 50);
     delay(5);
   }
+  count++;
+  }
+return;
 }
 
 int nfcWork(){
@@ -82,6 +124,25 @@ int nfcWork(){
     NfcTag tag = nfc.read();
     Serial.println(tag.getTagType());
     Serial.print("UID: ");Serial.println(tag.getUidString());
+
+
+    for (int x=0;x < sizeof(UUIDS) / sizeof(UUIDS[0]); x++){
+      if (UUIDS[x] == tag.getUidString()){
+        Serial.println("Hello, " + USERS[x] + "!\n");
+        if (keypadWork(x) != 0){
+        return -1;
+      }
+      }
+    }
+
+
+
+    
+//    if (tag.getUidString() == "F6 BD 3E F3"){
+//      if (keypadWork() != 0){
+//        return -1;
+//      }
+//    }
 
     if (tag.hasNdefMessage()) // every tag won't have a message
     {
@@ -144,14 +205,20 @@ void loop(){
   //162 bool readPassiveTargetID(uint8_t cardbaudrate, uint8_t *uid, uint8_t *uidLength, uint16_t timeout = 10, bool inlist = false);
   //changed timeout from 1000 to 10 to allow both keypad and rfid to respond without delay
 
-    char key = keypad.getKey();
-    if (key){
-      keypadWork(key);
-    }
 
 
    if (nfc.tagPresent()){
-nfcWork();
+      if (nfcWork() != 0){
+        Serial.println("Authentication Failed.\nPlease Re-Badge...\n");
+        attempts++;
+      } else {
+        Serial.println("Access Granted.");
+        attempts = 0;
+      }
+   }
+   if (attempts > 2){
+    siren();
+    attempts = 0;
    }
 
   
