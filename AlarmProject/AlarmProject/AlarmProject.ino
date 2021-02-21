@@ -58,6 +58,9 @@ void setup()
     FastLED.setBrightness(30);
     pinMode(SWITCH_PIN, INPUT_PULLUP);
 
+   leds[0] = CRGB(0, 0, 150);
+   FastLED.show();
+
 
 }
 
@@ -204,9 +207,14 @@ void loop(){
    if (nfc.tagPresent()){
       if (nfcWork() != 0){
         Serial.println("Authentication Failed.\nPlease Re-Badge...\n");
+        leds[0] = CRGB(0, 150, 0);
+        FastLED.show();
         attempts++;
       } else {
         Serial.println("Access Granted.");
+
+        leds[0] = CRGB(150, 0, 0);
+        FastLED.show();
         attempts = 0;
       }
    }
