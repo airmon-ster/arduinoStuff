@@ -57,6 +57,7 @@ void setup()
     FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds, 1);
     FastLED.setBrightness(30);
     pinMode(SWITCH_PIN, INPUT_PULLUP);
+    Serial.println("Please scan your badge on the reader...\n");
 }
 
 
@@ -156,10 +157,11 @@ int nfcWork(){
    }
   
     
-        Serial.println("Access Granted.");
+        
         leds[0] = CRGB(150, 0, 0);
         FastLED.show();
         siren(3000);
+        Serial.println("Access Granted.");
 
 
 
@@ -212,7 +214,7 @@ int nfcWork(){
         }
       }
     }
-  
+  delay(1500);
   return 0;
 }
 
@@ -227,22 +229,30 @@ void loop(){
    leds[0] = CRGB(0, 0, 150);
    FastLED.show();
 
+
+
    if (nfc.tagPresent()){
       siren(1500);
       if (nfcWork() != 0){
-        Serial.println("Authentication Failed.\nPlease Re-Badge...\n");
         leds[0] = CRGB(0, 150, 0);
         FastLED.show();
         siren(200);
         attempts++;
+        Serial.print("Authentication Failed. ");
+
+        if (attempts > 2){
+          Serial.println("Failed Authentication Limit Reached. Alarming\n");
+          siren(100);
+          attempts = 0;
+         }
+
+        Serial.println("Please Wait 5 Seconds to Re-Badge...\n");
+        delay(5000);
       } else {
         attempts = 0;
       } 
    }
-   if (attempts > 2){
-    siren(100);
-    attempts = 0;
-   }
+
 
   
 }
