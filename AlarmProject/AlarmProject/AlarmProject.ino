@@ -21,6 +21,7 @@ NfcAdapter nfc = NfcAdapter(pn532_i2c);
 
 
 #define LED_PIN 11
+#define LASERTRIP_PIN A1
 
 #define SWITCH_PIN 10
 
@@ -56,7 +57,8 @@ void setup()
     nfc.begin();
     FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds, 1);
     FastLED.setBrightness(30);
-    pinMode(SWITCH_PIN, INPUT_PULLUP);
+    //pinMode(SWITCH_PIN, INPUT_PULLUP);
+    pinMode(LASERTRIP_PIN, INPUT);
     Serial.println("Please scan your badge on the reader...\n");
 }
 
@@ -253,6 +255,17 @@ void loop(){
       } 
    }
 
+int s = digitalRead(LASERTRIP_PIN);
+   if (s)
+   {
+      //Motion - RED
+      leds[0] = CRGB(0, 150, 0);
+      FastLED.show();
+      siren(100);
+      delay(1000);
+   }
+   
+   
 
   
 }
