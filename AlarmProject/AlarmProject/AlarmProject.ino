@@ -65,7 +65,7 @@ void setup()
 int keypadWork(int uuidPosition){
   Serial.println("Enter your 4 digit pin...\n");
   int password[5];
-  int userPassword = PASSW[uuidPosition];
+
   
   
   for (int i = 0; i < 5; ++i){
@@ -80,7 +80,7 @@ int keypadWork(int uuidPosition){
   }
 
 
-  int legitPassword[] = {65,65,65,65,35};
+
 
 
   for (int i=0; i < 5; i++){
@@ -137,12 +137,6 @@ int nfcWork(){
 
 
 
-    
-//    if (tag.getUidString() == "F6 BD 3E F3"){
-//      if (keypadWork() != 0){
-//        return -1;
-//      }
-//    }
 
     if (tag.hasNdefMessage()) // every tag won't have a message
     {
