@@ -57,11 +57,6 @@ void setup()
     FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds, 1);
     FastLED.setBrightness(30);
     pinMode(SWITCH_PIN, INPUT_PULLUP);
-
-   leds[0] = CRGB(0, 0, 150);
-   FastLED.show();
-
-
 }
 
 
@@ -78,7 +73,8 @@ int keypadWork(int uuidPosition){
     
     while(keypad.getKey() != NO_KEY) {
       delay(1);
-    } 
+    }
+    siren(1500); 
 
   }
 
@@ -100,7 +96,28 @@ int keypadWork(int uuidPosition){
 
 
 
-void siren(){
+void siren(int alarmCode){
+
+  if (alarmCode == 1500){
+    tone(buzz, 1500, 50);
+    return;
+  }
+  if (alarmCode == 200){
+    tone(buzz, 200, 50);
+    delay(100);
+    tone(buzz, 200, 50);
+    delay(100);
+    tone(buzz, 200, 50);
+    return;
+  }
+  if (alarmCode == 3000){
+    tone(buzz, 1200, 50);
+    delay(100);
+    tone(buzz, 1500, 50);
+    delay(100);
+    tone(buzz, 1700, 50);
+    return;
+  }
 
   int count = 0;
 
@@ -134,10 +151,15 @@ int nfcWork(){
         Serial.println("Hello, " + USERS[x] + "!\n");
         if (keypadWork(x) != 0){
         return -1;
-      }
-      }
-    }
-
+     } 
+    } 
+   }
+  
+    
+        Serial.println("Access Granted.");
+        leds[0] = CRGB(150, 0, 0);
+        FastLED.show();
+        siren(3000);
 
 
 
@@ -202,24 +224,23 @@ void loop(){
   //162 bool readPassiveTargetID(uint8_t cardbaudrate, uint8_t *uid, uint8_t *uidLength, uint16_t timeout = 10, bool inlist = false);
   //changed timeout from 1000 to 10 to allow both keypad and rfid to respond without delay
 
-
+   leds[0] = CRGB(0, 0, 150);
+   FastLED.show();
 
    if (nfc.tagPresent()){
+      siren(1500);
       if (nfcWork() != 0){
         Serial.println("Authentication Failed.\nPlease Re-Badge...\n");
         leds[0] = CRGB(0, 150, 0);
         FastLED.show();
+        siren(200);
         attempts++;
       } else {
-        Serial.println("Access Granted.");
-
-        leds[0] = CRGB(150, 0, 0);
-        FastLED.show();
         attempts = 0;
-      }
+      } 
    }
    if (attempts > 2){
-    siren();
+    siren(100);
     attempts = 0;
    }
 
