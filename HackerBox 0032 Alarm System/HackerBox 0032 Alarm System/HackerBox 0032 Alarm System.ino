@@ -20,10 +20,10 @@ NfcAdapter nfc = NfcAdapter(pn532_i2c);
 #endif
 
 
-#define LED_PIN 11
+#define LED_PIN 10
 #define LASERTRIP_PIN A1
 
-#define SWITCH_PIN 10
+//#define SWITCH_PIN 10
 
 CRGB leds[1];
 
